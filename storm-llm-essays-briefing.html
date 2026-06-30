@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>STORM Briefing — LLMs on Graded Essays: A Department Policy Decision</title>
+  <style>
+    /* Anthropic Design System — Book page, Slate ink, single Crail accent.
+       Editorial serif (Source Serif 4) for reading; design-system sans token
+       reserved for UI chrome. Hairline rules, borders over shadows, no gradients. */
+    @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=Fira+Code:wght@400;500&display=swap');
+    :root {
+      --book:#F0EEE6; --ivory:#FAF9F5; --paper:#FFFFFF;
+      --ink:#1F1E1D; --muted:#6F6E69; --faint:#87867F;
+      --line:rgba(31,30,29,0.12); --line-solid:#D6D3CA;
+      --accent:#D97757; --accent-hover:#BD5D3A; --accent-bg:#F5E7DE;
+      /* muted earth-tone semantics — never saturated UI green/amber/red */
+      --hi:#5A7D3E; --med:#B4873C; --lo:#B0493A;
+      --hi-bg:#E8EDE0; --med-bg:#F4EBD9; --lo-bg:#F1E1DC;
+      --font-sans:"Comic Sans MS","Comic Sans","Chalkboard SE","Comic Neue",ui-rounded,system-ui,sans-serif;
+      --font-serif:"Source Serif 4","Tiempos Text","Iowan Old Style","Palatino",Georgia,serif;
+      --font-mono:"Fira Code",ui-monospace,Menlo,monospace;
+    }
+    body { margin:0; background:var(--book); color:var(--ink);
+      font-family:var(--font-serif); font-size:17px; line-height:1.6;
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+    main { max-width:880px; margin:auto; padding:64px 24px 96px; }
+    h1 { font-family:var(--font-serif); font-weight:400; font-size:clamp(34px,4.5vw,52px);
+      line-height:1.08; letter-spacing:-0.02em; margin:0 0 14px; }
+    h2 { font-family:var(--font-serif); font-weight:400; font-size:clamp(26px,3vw,34px);
+      line-height:1.2; letter-spacing:-0.01em; margin-top:56px; padding-top:28px; border-top:1px solid var(--line); }
+    h3 { font-family:var(--font-serif); font-weight:600; font-size:20px; line-height:1.3; letter-spacing:-0.005em; margin:0 0 8px; }
+    h4 { font-family:var(--font-serif); font-weight:600; font-size:17px; line-height:1.3; }
+    p { margin:0 0 12px; }
+    a { color:var(--ink); text-decoration:underline; text-decoration-thickness:1px;
+      text-underline-offset:3px; text-decoration-color:var(--accent); }
+    a:hover { color:var(--accent-hover); }
+    strong, b { font-weight:600; }
+    .meta { font-family:var(--font-sans); color:var(--muted); font-size:14px; line-height:1.55; }
+    .summary, .finding { background:var(--ivory); border:1px solid var(--line); border-radius:10px; padding:24px; }
+    .summary { margin-top:8px; }
+    .summary h2 { margin-top:0; padding-top:0; border-top:0; }
+    .summary p:last-child, .finding p:last-child { margin-bottom:0; }
+    .finding { margin:16px 0; }
+    .badge { display:inline-block; font-family:var(--font-sans); padding:3px 11px; border-radius:999px;
+      background:var(--accent-bg); color:var(--accent-hover); font-size:12px; font-weight:600; letter-spacing:.01em; }
+    .rel-high { background:var(--hi-bg); color:var(--hi); }
+    .rel-med  { background:var(--med-bg); color:var(--med); }
+    .rel-low  { background:var(--lo-bg); color:var(--lo); }
+    .lens { font-family:var(--font-sans); color:var(--muted); font-size:13.5px; line-height:1.55; margin-top:12px; margin-bottom:0; }
+    .lens b { color:var(--ink); }
+    table { width:100%; border-collapse:collapse; margin-top:12px; }
+    th, td { border-bottom:1px solid var(--line); padding:11px 10px; text-align:left; vertical-align:top; font-size:14px; }
+    th { font-family:var(--font-sans); background:var(--ivory); font-weight:600; color:var(--ink); }
+    .v-confirmed { font-family:var(--font-sans); color:var(--hi); font-weight:600; }
+    .v-corrected { font-family:var(--font-sans); color:var(--med); font-weight:600; }
+    .v-demoted   { font-family:var(--font-sans); color:var(--lo); font-weight:600; }
+    ul { margin:8px 0 0; padding-left:22px; }
+    li { margin:6px 0; }
+    .note { font-family:var(--font-sans); color:var(--muted); font-size:13px; }
+    .callout { border-left:3px solid var(--accent); padding:14px 18px; margin:18px 0; background:var(--ivory); border-radius:0 10px 10px 0; }
+    /* CSS-only tabs (no JS) */
+    .tabs { margin-top:20px; }
+    .tabs > input[type=radio] { position:absolute; opacity:0; pointer-events:none; }
+    .tablabels { display:flex; flex-wrap:wrap; gap:4px; border-bottom:2px solid var(--accent); }
+    .tablabels label { font-family:var(--font-sans); padding:9px 14px; cursor:pointer; border:1px solid var(--line); border-bottom:none;
+      border-radius:8px 8px 0 0; background:var(--ivory); color:var(--muted); font-size:13px; font-weight:600; transition:color var(--dur,200ms) ease; }
+    .tablabels label:hover { color:var(--accent); }
+    .tabpanel { display:none; padding:22px 24px; border:1px solid var(--line); border-top:none; background:var(--paper); border-radius:0 0 10px 10px; }
+    .tabpanel h4 { font-family:var(--font-serif); margin:20px 0 4px; font-size:16px; color:var(--ink); }
+    .tabpanel h4:first-child { margin-top:0; }
+    .tabpanel p { margin:5px 0; font-size:15px; }
+    .tabpanel .src { font-family:var(--font-sans); color:var(--muted); font-size:13px; }
+    .tabpanel .conf { font-family:var(--font-sans); font-weight:600; font-size:12.5px; color:var(--accent-hover); }
+    .lens-intro { font-family:var(--font-sans); background:var(--ivory); border-left:3px solid var(--accent);
+      padding:12px 16px; margin-bottom:14px; font-size:13.5px; color:var(--muted); border-radius:0 8px 8px 0; }
+    #t1:checked ~ .tablabels label[for=t1], #t2:checked ~ .tablabels label[for=t2],
+    #t3:checked ~ .tablabels label[for=t3], #t4:checked ~ .tablabels label[for=t4],
+    #t5:checked ~ .tablabels label[for=t5], #t6:checked ~ .tablabels label[for=t6],
+    #t7:checked ~ .tablabels label[for=t7]
+      { background:var(--paper); color:var(--accent); border-bottom:2px solid var(--paper); margin-bottom:-2px; }
+    .tabs > input[type=radio]:focus-visible ~ .tablabels label { outline:2px solid var(--accent); outline-offset:2px; }
+    #t1:checked ~ #p1, #t2:checked ~ #p2, #t3:checked ~ #p3, #t4:checked ~ #p4,
+    #t5:checked ~ #p5, #t6:checked ~ #p6, #t7:checked ~ #p7 { display:block; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Should students be allowed to use LLMs on graded essays?</h1>
+  <p class="meta">STORM multi-lens briefing for a high-school humanities department head setting next year's policy · five lenses (practitioner · academic · skeptic · economist · historian) · adversarially verified · prepared June 2026.<br>
+  <strong>This briefing informs a decision; it does not issue a verdict.</strong> It surfaces uncertainty on purpose.</p>
+
+  <section class="summary">
+    <h2>60-Second Summary</h2>
+    <p>The real choice is <strong>not "ban vs. allow."</strong> All five lenses independently converged on the same conclusion: framing the decision as a yes/no rule on the tool is the mistake. A blanket ban is unenforceable (54% of U.S. teens already use chatbots for schoolwork) and regressive (it binds only honest and under-resourced students). Blanket permission silently erodes both the skill the essay is meant to build and the grade's value as a signal.</p>
+    <p>The defensible policy is <strong>structural, not prohibitive</strong>: tier each assignment, and protect at least one <strong>AI-free, in-person/oral assessment anchor</strong> where authorship is observable. Move the weight of the grade off "the finished take-home essay" — which can no longer be reliably attributed to a student — and onto <strong>observable process</strong> (drafts, revision history, in-class writing, brief oral defense on a sample of essays).</p>
+    <p><strong>Do not anchor enforcement on AI detectors.</strong> This is the single highest-confidence, lowest-disputed finding across every lens: detectors are unreliable, biased against non-native-English and some neurodivergent writers, and have already produced a live $150M federal civil-rights lawsuit against a nearby district (Palo Alto Unified, May 2026). The detector is the thing that *creates* your liability, not the thing that protects you from it.</p>
+    <p><strong>Your real job as department head is standardization</strong> — one shared assignment-labeling system, one disclosure template, one due-process appeals path, and protected teacher time — far more than picking the "correct" stance on AI.</p>
+  </section>
+
+  <section>
+    <h2>Key Findings <span class="note">(ranked by reliability — strongest evidence first)</span></h2>
+
+    <div class="finding">
+      <h3>1. Detector-based enforcement is empirically broken and discriminatory — do not build policy on it. <span class="badge rel-high">Reliability: HIGH</span></h3>
+      <p>Seven detectors falsely flagged <strong>61.3%</strong> of non-native-English (TOEFL) essays as AI-generated while near-zero native essays were flagged (Stanford/Liang 2023). Turnitin's own CPO concedes a ~4% document-level false-positive rate; independent real-world estimates run far higher, and trivial "humanizer" paraphrasing collapses detector accuracy. Multiple universities (Vanderbilt and others) disabled Turnitin's AI detector. On an 1,800-student school doing 4 essays/year, even a 5% false-positive rate is ~360 false accusations a year.</p>
+      <p class="lens"><b>Support:</b> academic, skeptic, practitioner, economist, historian all independently. <b>Challenge:</b> vendors dispute methodology; updated detectors claim improvement — but those are interested, lab-condition claims. <b>So what:</b> bar detector scores as the sole/primary basis for any integrity charge; treat a flag as a reason to talk, never as proof.</p>
+    </div>
+
+    <div class="finding">
+      <h3>2. A blanket ban is unenforceable and regressive. <span class="badge rel-high">Reliability: HIGH</span></h3>
+      <p>54% of U.S. teens have used chatbots for schoolwork (Pew, Feb 2026), and ~46% of teen AI-users did so without teacher permission (Common Sense Media). Take-home LLM use is unobservable; a ban is obeyed mainly by the conscientious and by students who lack the private tutors and savvy parents that let wealthier students cheat undetectably. Every comparable tool ban (calculators, Wikipedia, word processors) was quietly abandoned and widened equity gaps while it lasted.</p>
+      <p class="lens"><b>Support:</b> practitioner, skeptic, economist, historian. <b>Challenge:</b> bans aren't useless — visible deterrence shifts *some* behavior (Turnitin plausibly cut verbatim copying). <b>So what:</b> if you restrict, restrict the *assessment setting* (proctored/in-class), not the tool's existence.</p>
+    </div>
+
+    <div class="finding">
+      <h3>3. The durable answer is tiered assessment with a protected unaided anchor — history is unusually clear here. <span class="badge rel-high">Reliability: HIGH</span></h3>
+      <p>Math education never resolved calculators with "allowed/banned." NCTM recommended calculators in 1980; the SAT built separate calculator and no-calculator sections (1994). The stable equilibrium was structural: some tasks use the tool, some don't, and the test design enforces which. The LLM analogue: take-home work may assume AI assistance, but a protected in-person/oral tier certifies unaided capability — which students still need for timed exams, AP/IB, and college, all of which will lag your classroom by years.</p>
+      <p class="lens"><b>Support:</b> historian, practitioner, economist, academic. <b>Challenge (important):</b> the calculator analogy <em>breaks</em> — a calculator automates a sub-step (arithmetic) inside reasoning; an LLM can produce the entire graded artifact, including the reasoning. The optimistic base rate is the likely case, not a guarantee. <b>So what:</b> build the unaided tier <em>now</em>; this is the one adoption cycle where the tool can hollow out the core skill, not just a peripheral one.</p>
+    </div>
+
+    <div class="finding">
+      <h3>4. Shift the grade onto observable process; the take-home essay as a graded artifact may simply be obsolete. <span class="badge rel-high">Reliability: HIGH</span></h3>
+      <p>The most reliable AI-resistant approaches in practice are not detection but <strong>process documentation + a personal/oral component</strong>: Google Docs revision history, in-class drafting checkpoints, and short oral defenses or annotations on a <em>sample</em> of essays. Oral defense is the most AI-robust assessment but is labor-bound at ~1:1 examiner time, so use it as spot-checks, not universally. Economically, assessment redesign is a high-fixed/low-recurring cost; detection is low-fixed but high-recurring (subscription + perpetual adjudication labor), so redesign is the cheaper steady state over 3–5 years.</p>
+      <p class="lens"><b>Support:</b> practitioner, economist, historian, skeptic. <b>Challenge:</b> redesign front-loads cost into one budget year and into contract/PD time that is hard to mobilize — which is exactly why schools default to the worse long-run option. <b>So what:</b> fund redesign with PD time and shared department materials, or it will be quietly ignored.</p>
+    </div>
+
+    <div class="finding">
+      <h3>5. Sequence matters: "draft unaided first, then use AI to revise" is the most defensible permit design. <span class="badge rel-med">Reliability: MEDIUM</span></h3>
+      <p>The mechanism is plausible and partly evidenced: writing is itself a learning act (writing-to-learn meta-analysis, d≈0.26 — real but small), and heavy LLM reliance <em>during</em> composition is associated with weaker neural engagement and poor recall of one's own text (MIT "Your Brain on ChatGPT," 2025). The cleanest permit rule that follows: students submit an unaided outline/draft <em>before</em> any AI assistance; AI is allowed only at the revision/feedback stage, and as a tutor/critic rather than an author.</p>
+      <p class="lens"><b>Support:</b> practitioner, academic (mechanism), some AI-tutoring RCTs (Harvard/Kestin 2025). <b>Challenge:</b> the MIT study is a non-peer-reviewed preprint, n=54 (only 18 in the key session), adults not high-schoolers, lab task not classroom — do <em>not</em> cite it as proof AI "rots brains." The tutoring RCTs used <em>constrained</em> tutors, not open ChatGPT, and don't transfer to essay use. <b>So what:</b> sequence-and-disclose is defensible on mechanism + practitioner experience, not on settled proof.</p>
+    </div>
+
+    <div class="finding">
+      <h3>6. Permitting LLMs erodes the grade's signal value — keep at least one un-spoofable assessment. <span class="badge rel-med">Reliability: MEDIUM</span></h3>
+      <p>The essay grade is a costly signal certifying writing/reasoning to colleges and employers. If the grade can be produced by prompting, it stops separating "can write" from "can prompt," and external consumers discount the whole school's credential — a cost borne even by students who never use AI. This is the strongest economic argument for preserving a verified AI-free component regardless of how permissive the take-home policy is.</p>
+      <p class="lens"><b>Support:</b> economist, skeptic (construct-validity erosion: teachers score near chance at detecting AI prose). <b>Challenge:</b> signal erosion is diffuse and slow — it competes for attention against the visible, viral risk of a false-accusation lawsuit, which pushes administrators toward detection (the thing that causes the lawsuit). <b>So what:</b> the protected unaided tier (Finding 3) is what defends the signal.</p>
+    </div>
+
+    <div class="finding">
+      <h3>7. There is no clean equity answer — own the tradeoff rather than claiming the high ground. <span class="badge rel-med">Reliability: MEDIUM</span></h3>
+      <p>Permitting AI imports household income into grades: wealthier students submit frontier-model-polished work while low-income students get throttled free tiers. But banning AI also disadvantages the low-income students who used it as a substitute for the private tutoring they can't afford. Whichever way you go has an inequality vector. The equity-maximizing (and costlier) move is a <strong>school-provisioned, privacy-vetted, equal-access AI tool</strong> with some AI-permitted work done in class, so you don't assume home access.</p>
+      <p class="lens"><b>Support:</b> skeptic, economist, practitioner, historian. <b>Challenge:</b> a district AI license adds cost and a non-trivial FERPA/data-privacy review. <b>So what:</b> don't claim either option is the "fair" one; pick the inequality you can best mitigate, and fund equal access if you permit.</p>
+    </div>
+
+    <div class="finding">
+      <h3>8. Disclosure helps but does not "solve" integrity — and "AI literacy is essential" does not by itself justify AI on essays. <span class="badge rel-low">Reliability: LOWER / claims to demote</span></h3>
+      <p>Mandatory disclosure is gameable: an under-discloser is indistinguishable from a non-user, and punishing disclosure just teaches students to hide use. Disclosure works only when kept low-stakes <em>and</em> backed by process evidence. Separately, the popular "students must learn AI, therefore permit it on graded essays" argument is a non-sequitur — you can teach AI literacy as explicit instruction without outsourcing the one task (composition) where skill-erosion risk is highest.</p>
+      <p class="lens"><b>Demote:</b> "detectors are 99% accurate" (vendor lab figure); "disclosure solves the integrity problem"; "AI literacy is essential → permit on essays"; "AI will rot students' brains" (overstated from one preprint — treat as suggestive). <b>Source:</b> skeptic lens red-team, corroborated by practitioner and academic.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Assumptions And Missing Lens</h2>
+    <p><strong>Core assumptions this briefing rests on:</strong></p>
+    <ul>
+      <li>Your students already have widespread out-of-school access to capable LLMs (national surveys; true in most U.S. contexts, but verify for your specific population).</li>
+      <li>You can mobilize some teacher PD/release time and department-wide standardization — the analysis assumes the binding constraint is teacher hours and contract time, not the (small) cash cost of tools.</li>
+      <li>Take-home writing remains part of your assessment mix. If you move fully to in-class/proctored writing, much of the detection debate dissolves but pedagogy and equity tradeoffs change.</li>
+      <li>Evidence on long-term effects of AI essay assistance on high-school writing skill <strong>does not yet exist</strong> — no rigorous longitudinal classroom RCT. You are deciding ahead of the evidence; design for reversibility and review the policy annually.</li>
+    </ul>
+    <div class="callout">
+      <strong>The missing sixth lens — the student and the parent/legal-rights stakeholder.</strong> The five analytic lenses are institution-facing. Two voices are under-represented and matter enormously here:
+      <ul>
+        <li><b>The student's own norm.</b> Teens already rate essays as the <em>least</em> acceptable place to use AI (Pew: 18% acceptable for essays vs. 54% for research). A policy can build on this existing norm rather than impose one from scratch.</li>
+        <li><b>The parent / civil-rights / due-process stakeholder.</b> The Palo Alto Unified federal lawsuit (a $150M suit the district is actively fighting as of June 2026) shows false-accusation harm is now a litigated civil-rights matter, with allegations of racial and gender disparity in who gets flagged. A written due-process appeals path is not optional — it is your primary liability shield.</li>
+      </ul>
+      A "deeper council" version of this research could add these as live lenses (a student panel and a school-attorney/equity-officer lens); say the word and I'll scope it — it is more expensive (an agent-team debate rather than five parallel readers).
+    </div>
+  </section>
+
+  <section>
+    <h2>Practical Takeaways</h2>
+    <ul>
+      <li><strong>Write a tiered policy, not a yes/no rule.</strong> Label every assignment with one of three icons: <em>AI-free</em> (in-class/proctored), <em>AI-assisted-with-disclosure</em> (revision/feedback only, after an unaided draft), <em>AI-collaborative</em> (open, low-stakes). One shared system across all classrooms — consistency is your biggest value-add.</li>
+      <li><strong>Protect one unaided anchor per unit</strong> — a timed in-class write or a short oral defense on a sample of essays — to certify capability and defend the credential. Pair it with take-home work; don't let it become the whole grade (it disadvantages dysgraphic/slow-handwriting/anxious students).</li>
+      <li><strong>Ban detector scores as evidence.</strong> Put it in writing: no integrity charge rests on a detector flag alone. Define a human-review appeals path with a named authority and a presumption that the student can clear themselves with process artifacts.</li>
+      <li><strong>Shift the grade onto process.</strong> Require revision history / draft folders. Teach the permitted "AI-as-critic, not author; draft-first-then-revise" workflow explicitly in the first AI-permitted assignment.</li>
+      <li><strong>Keep disclosure low-stakes and verified-by-process</strong>, so students don't hide use and disclosure isn't theater.</li>
+      <li><strong>Spend on PD and redesign, not detection.</strong> Reallocate the detector budget + its hidden adjudication labor to teacher PD on AI-resilient assignment design. If you permit AI, provide an equal-access, privacy-vetted school tool and do some AI-work in class.</li>
+      <li><strong>Review annually and design for reversibility.</strong> You're deciding ahead of the evidence and ahead of slow-moving external exams; treat any stance as a time-boxed bridge, not a destination.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Behind the Scenes <span class="note">— each lens's raw output, the contradiction map, and how the final report was built</span></h2>
+    <p class="note">The five lenses ran as independent parallel subagents that never saw each other's work. What follows is their unedited reasoning, the contradiction map that compared them, and the synthesis logic — so you can audit how the headline conclusions were reached.</p>
+
+    <div class="tabs">
+      <input type="radio" name="bts" id="t1" checked>
+      <input type="radio" name="bts" id="t2">
+      <input type="radio" name="bts" id="t3">
+      <input type="radio" name="bts" id="t4">
+      <input type="radio" name="bts" id="t5">
+      <input type="radio" name="bts" id="t6">
+      <input type="radio" name="bts" id="t7">
+      <div class="tablabels">
+        <label for="t1">🛠 How it was built</label>
+        <label for="t2">⚔ Contradiction map</label>
+        <label for="t3">🔧 Practitioner</label>
+        <label for="t4">🎓 Academic</label>
+        <label for="t5">🕵 Skeptic</label>
+        <label for="t6">💰 Economist</label>
+        <label for="t7">📜 Historian</label>
+      </div>
+
+      <!-- ===== HOW IT WAS BUILT ===== -->
+      <div class="tabpanel" id="p1">
+        <h4>The pipeline (6 steps)</h4>
+        <p>1. <b>Scope</b> → 2. <b>five parallel lens subagents</b> → 3. <b>contradiction map</b> → 4. <b>synthesis (V1)</b> → 5. <b>adversarial verification (V2)</b> → 6. <b>this HTML briefing</b>.</p>
+
+        <h4>Step 1 — Scope decision</h4>
+        <p>The question arrived already well-formed: a real <em>decision</em> (permit LLMs on graded essays or not) with bull/bear tension, costs, history, and verifiable claims, plus a named decision-maker (department head) and deadline (next year's policy). That cleared the bar for a full run, so <b>no clarifying questions were asked</b> — the skill only interrupts to ask when the topic is vague. Scope framed as: "Should a HS humanities department permit student LLM use on graded essays, and under what policy?"</p>
+
+        <h4>Step 2 — Why these five lenses</h4>
+        <p>The five lenses are <em>hardcoded</em>, not chosen per-topic: practitioner (what breaks in implementation), academic (what the evidence actually supports), skeptic (red-team both sides), economist (costs/incentives/signal), historian (prior adoption cycles). They ran <b>simultaneously and blind to one another</b> — so any agreement between them is independent convergence, which is stronger evidence than a single chain of reasoning. Each did its own live web research.</p>
+
+        <h4>Step 4 — How findings were ranked</h4>
+        <p>Reliability tiers were assigned by <b>how many independent lenses landed on a claim AND how strong each one's sourcing was</b>. "Detectors are broken" hit HIGH because all five reached it independently and it rests on a replicated peer-reviewed study. "Sequencing preserves learning" got MEDIUM because its key support (the MIT study) is a preprint. Claims only one lens raised, or that rest on vendor/secondary sourcing, were demoted.</p>
+
+        <h4>Step 4 — Disagreement was preserved, not averaged</h4>
+        <p>The synthesis deliberately did <em>not</em> smooth conflicting lenses into a false consensus. Where the practitioner leaned on the MIT study and the academic + skeptic warned it's over-cited, both appear — in Finding 5's "Challenge" line. The equity tension (no clean answer either way) is stated as a tension, not resolved. Every finding carries an explicit <b>Support</b> and <b>Challenge</b> note naming which lenses pulled which way.</p>
+
+        <h4>Step 5 — Adversarial verification</h4>
+        <p>Every load-bearing number, name, and date was checked against its source; the post-cutoff 2026 items (the Pew survey, the Palo Alto lawsuit) were <b>re-verified with live web searches</b> because they fall after the model's knowledge cutoff and leaned on single outlets. That pass <em>confirmed</em> most claims, <em>corrected</em> the Palo Alto case framing (it's a racial/gender-disparity + due-process suit, not an ESL case as one lens assumed), and <em>down-weighted or demoted</em> the MIT magnitude claim, the AI-tutoring transfer claim, the secondary 18.7% figure, and the vendor "99% accurate" claim. See the Source Verification table below for the full confirmed/corrected/demoted ledger.</p>
+
+        <h4>Honest limits of this method</h4>
+        <p>Subagents can't interrogate each other — the contradiction map is the only place their outputs meet, and it's assembled by the orchestrator, not debated. There is no rigorous longitudinal evidence on the core question, so several findings are mechanism-plausible rather than proven. A more expensive "council/debate" variant (agents argue across rounds, plus added student and legal/equity lenses) would stress-test harder — offered, not run.</p>
+      </div>
+
+      <!-- ===== CONTRADICTION MAP ===== -->
+      <div class="tabpanel" id="p2">
+        <p class="lens-intro">Phase 2 output: the orchestrator's side-by-side comparison of the five blind lens reports — where they converge, where they genuinely collide, what's weakly evidenced, and what was missing.</p>
+
+        <h4>Where the lenses agreed (independent convergence)</h4>
+        <p>• <b>Detector-based enforcement is broken and inequitable</b> — reached by all five lenses separately. Highest-confidence, lowest-disputed finding in the whole run.<br>
+        • <b>A blanket ban of an already-ubiquitous tool fails and is regressive</b> — practitioner, skeptic, economist, historian.<br>
+        • <b>The workable design is tiered assessment with a protected unaided/proctored/oral anchor</b> — all five.<br>
+        • <b>Process/oral evidence beats output forensics</b> — practitioner, economist, historian, skeptic.<br>
+        • <b>The department head's real lever is standardization + due process</b>, not picking a stance — practitioner, economist.</p>
+
+        <h4>Where the lenses genuinely contradicted each other</h4>
+        <p>• <b>How strong is the "AI erodes writing/cognition" claim?</b> Practitioner used the MIT study to justify a draft-first sequence; academic and skeptic both flagged it as an over-cited preprint that can't carry long-term conclusions. → Surfaced in Finding 5, not resolved.<br>
+        • <b>Equity cuts both ways.</b> Skeptic + economist: permitting bakes the pay-gap into grades. Economist + historian: banning shoves low-income students back toward unaffordable tutoring. → Genuine two-way tension; no clean high ground (Finding 7).<br>
+        • <b>Does "AI tutoring helps" transfer?</b> Academic cited RCTs showing learning gains; skeptic countered they used constrained tutors on STEM tasks, not open ChatGPT on essays. → Benefit scope-limited in verification.<br>
+        • <b>Is history reassuring?</b> Historian's base rate says "integration, fine within 5 years"; the historian's own caution + skeptic note the calculator analogy <em>breaks</em> because an LLM replaces the whole artifact, not a sub-skill. → Finding 3's challenge line.</p>
+
+        <h4>Claims with strong evidence</h4>
+        <p>Detector bias against non-native writers (replicated, peer-reviewed); near-universal teen AI use (large national surveys); writing-to-learn has real value (large meta-analysis); the calculator/SAT policy timeline (documented).</p>
+
+        <h4>Claims with weak evidence — flagged for demotion</h4>
+        <p>MIT "cognitive debt" magnitude/durability (single small preprint); "detectors are 99% accurate" (vendor lab claim); "AI literacy is essential ⇒ permit on essays" (non-sequitur); "disclosure solves integrity" (unauditable); the 18.7% non-native false-positive figure (secondary sourcing).</p>
+
+        <h4>Which stakeholder/lens was missing</h4>
+        <p>The five lenses are all <b>institution-facing</b>. Under-represented: (1) the <b>student's own voice</b> — who already rate essays as the least acceptable place for AI, a norm to build on; (2) the <b>parent / civil-rights / due-process stakeholder</b> — which the Palo Alto lawsuit shows is now the dominant legal risk.</p>
+
+        <h4>What had to be verified before publication</h4>
+        <p>The 2026-dated items (Pew Feb 2026, the Palo Alto suit) — both post-cutoff and initially single-sourced. Both were re-checked live before anything was claimed; the Palo Alto framing was corrected as a result.</p>
+      </div>
+
+      <!-- ===== PRACTITIONER ===== -->
+      <div class="tabpanel" id="p3">
+        <p class="lens-intro">Lens brief: "Act as an operator who must implement the idea. Find what works in practice, what setup is required, what breaks first, what the reader should do differently, and what evidence supports it." Returned 12 claims.</p>
+
+        <h4>P1 — A pure AI ban is unenforceable; bans just push use underground. <span class="conf">[high]</span></h4>
+        <p>Majority of HS students already use AI (College Board/Morning Consult 2025; EdWeek Oct 2025). <b>Implication:</b> write tiered per-assignment rules, not a binary "no AI." <b>Risk:</b> tiered rules add teacher load if not standardized.</p>
+        <h4>P2 — AI detectors must not be discipline evidence: 4–20% false positives. <span class="conf">[high]</span></h4>
+        <p>Turnitin admits ~4% (Bloomberg Oct 2024); independents cite 5–20%; Stanford/Liang flagged 61.3% of non-native essays. <b>Implication:</b> bar detector scores as sole basis for a charge — a flag starts a conversation, not a verdict.</p>
+        <h4>P3 — Detectors are biased against your most vulnerable students. <span class="conf">[high / med on exact figure]</span></h4>
+        <p>ELL and formulaic writers disproportionately flagged → equity + legal exposure.</p>
+        <h4>P4 — False accusations carry severe documented consequences, incl. a civil-rights suit. <span class="conf">[high]</span></h4>
+        <p>Palo Alto case (SF Standard May 2026); Rolling Stone; WaPo. <b>Implication:</b> install written due process — human review, process artifacts, presumption against detector-only evidence, named appeal authority.</p>
+        <h4>P5 — The most reliable AI-resistant assessment is process documentation + a personal/oral component, NOT detection. <span class="conf">[high]</span></h4>
+        <p>Best results combine 2–3 approaches: version history + in-class checkpoints + short oral defense. <b>Risk:</b> labor-intensive; doesn't scale without restructuring class time.</p>
+        <h4>P6 — In-class handwritten writing is the bluntest reliable AI-free signal — but has validity/equity costs. <span class="conf">[high]</span></h4>
+        <p>"Blue books" returning in 2025. <b>Risk:</b> disadvantages dysgraphia/processing-speed/anxiety; measures a lower-order skill. Use as one anchor, not the whole grade.</p>
+        <h4>P7 — Sequence matters: "draft unaided first, then revise with AI" preserves learning; "AI-first" degrades it. <span class="conf">[med]</span></h4>
+        <p>MIT "Your Brain on ChatGPT" (June 2025, EEG, n≈54). <b>Caveat (self-flagged):</b> small preprint, lab task — don't overclaim.</p>
+        <h4>P8 — "AI-as-tutor/feedback" is more defensible than "AI-as-author." <span class="conf">[med]</span></h4>
+        <p>Frame permitted use as brainstorming/feedback/Socratic questioning; student stays the author. <b>Risk:</b> feedback/ghost-writing line is blurry.</p>
+        <h4>P9 — Mandatory disclosure partly works but is gamed; needs trust + process evidence, not signatures alone. <span class="conf">[med]</span></h4>
+        <p>Keep disclosure low-stakes for permitted use so students don't hide it; back it with artifacts.</p>
+        <h4>P10 — Teacher workload/burnout is the binding constraint — design for sustainability. <span class="conf">[high]</span></h4>
+        <p>Prosecuting AI cases is the highest-workload path; redesign is higher up-front but lower per-incident. Budget PD time + shared materials.</p>
+        <h4>P11 — Cross-classroom inconsistency is the top teacher complaint — standardization is the department head's main value-add. <span class="conf">[high]</span></h4>
+        <p>Ship a department-wide labeling system, one disclosure template, one appeals process, one PD session.</p>
+        <h4>P12 — Equity of access is a real trap — permitting without school-provided access advantages students with paid home tools. <span class="conf">[med-high]</span></h4>
+        <p>Provide a district-licensed, privacy-vetted tool; do some AI-work in class; vet FERPA.</p>
+        <p class="src"><b>Operational bottom line:</b> detectors are a liability not a control; shift the grade onto observable process + in-class/oral anchors; permit AI in a sequenced feedback-only mode with low-stakes disclosure; the department head's real job is standardization, due process, equitable access, and protecting teacher workload — not "ban vs. allow."</p>
+      </div>
+
+      <!-- ===== ACADEMIC ===== -->
+      <div class="tabpanel" id="p4">
+        <p class="lens-intro">Lens brief: "Act as an evidence reviewer. Find research support, definitions, methodology quality, limits, and claims needing careful wording." Framing note it volunteered: the research base on graded essays <em>specifically</em> is thin, short-term, and dominated by one viral preprint.</p>
+
+        <h4>Claim 1 — Heavy LLM reliance during writing is associated with reduced neural engagement, lower ownership, worse recall (short-term, lab). <span class="conf">[MED effect exists / LOW that it generalizes]</span></h4>
+        <p>MIT "Your Brain on ChatGPT" (Kosmyna et al. 2025, arXiv 2506.08872), EEG, 54 adults. LLM users: weakest connectivity, lowest ownership, worst recall of their own text. "Cognitive debt."</p>
+        <h4>Claim 2 — That study cannot support strong causal/long-term claims — the key caveat. <span class="conf">[HIGH as a caveat]</span></h4>
+        <p>n=54 but only ~18 completed session 4 (~9/cell for the pivotal switch); not peer-reviewed; Boston-area adults not high-schoolers; authors themselves say "preliminary." It is the most over-cited data point in the debate.</p>
+        <h4>Claim 3 — "Use" is not one thing; effect depends on which stage AI touches. <span class="conf">[HIGH the distinction matters / effects UNKNOWN]</span></h4>
+        <p>Brainstorming vs. drafting vs. full generation differ; no study isolates "outline only" vs. "AI writes draft" for K-12 essays. The gap is itself a finding.</p>
+        <h4>Claim 4 — Writing is a genuine learning mechanism, but the average effect is small. <span class="conf">[MED-HIGH]</span></h4>
+        <p>Bangert-Drowns, Hurley &amp; Wilkinson (2004) meta-analysis: writing-to-learn d≈0.26. Strongest empirical basis for restricting <em>full generation</em> (not for "any AI destroys writing").</p>
+        <h4>Claim 5 — Well-designed AI tutoring can RAISE outcomes — AI isn't uniformly harmful. <span class="conf">[HIGH that design decides]</span></h4>
+        <p>Kestin et al. (Harvard, Scientific Reports 2025) RCT: ~double the learning gains. <b>But</b> used <em>constrained</em> tutors that withhold answers — NOT open ChatGPT, NOT essay grading. Benefit doesn't auto-transfer.</p>
+        <h4>Claim 6 — AI detectors aren't reliable enough to underpin enforcement, and are biased against non-native writers. <span class="conf">[HIGH]</span></h4>
+        <p>Liang et al. (Stanford 2023): ~61% of TOEFL human essays flagged; one detector flagged 97.8%; near-zero on US-native. Vendors dispute; absolute rates vary by tool.</p>
+        <h4>Claim 7 — Banning fights a near-universal behavior. <span class="conf">[HIGH]</span></h4>
+        <p>Pew Jan 2025: 26% of teens used ChatGPT for schoolwork (double 2023). Pew Feb 2026: 54%. Common Sense: 46% used AI without teacher permission.</p>
+        <h4>Claim 8 — Students themselves rate essays as the LEAST acceptable place for AI. <span class="conf">[MED-HIGH]</span></h4>
+        <p>Pew: acceptable for research (54%) ≫ essays (18%). A norm policy can build on rather than impose.</p>
+        <h4>Claim 9 — There is essentially NO rigorous long-term classroom RCT on AI essay assistance and HS writing-skill development. <span class="conf">[HIGH the gap exists]</span></h4>
+        <p>The honest bottom line: the department head is deciding ahead of the evidence.</p>
+        <p class="src"><b>Wording cautions it issued:</b> say "associated with," not "causes brain damage"; always flag the MIT preprint's limits; don't cite tutoring RCTs as proof ChatGPT-on-essays helps; distinguish "detectors are biased" (supported) from "useless" (overstated); writing-to-learn is real but <em>small</em>. Strong evidence: detector bias, usage prevalence, writing-to-learn value. Weak: cognitive-debt magnitude. Genuine unknown: net effect on HS writing skill.</p>
+      </div>
+
+      <!-- ===== SKEPTIC ===== -->
+      <div class="tabpanel" id="p5">
+        <p class="lens-intro">Lens brief: "Act as a red-team reviewer." It was told to attack <em>all three</em> camps — permit, ban, and hybrid-disclosure — and to red-team the evidence each side leans on, including the anti-AI side's own favorite study.</p>
+
+        <h4>C1 — "AI detectors let us enforce a ban" is false comfort. <span class="conf">[HIGH]</span></h4>
+        <p>Real-world false positives ~15–18% on actual submissions vs. vendors' sub-1% lab figures; Turnitin admits ±15-pt variance; 7-detector eval found accuracy collapsing under trivial paraphrasing. Vanderbilt, Yale, Johns Hopkins, Northwestern disabled detection. A detector-based ban yields false acquittals AND false convictions — worst of both worlds.</p>
+        <h4>C2 — False positives fall hardest on ESL and neurodivergent students. <span class="conf">[HIGH]</span></h4>
+        <p>61.3% of TOEFL essays falsely flagged (Stanford); low lexical "burstiness" is shared by ESL and AI text — and plausibly by some autistic/neurodivergent writers.</p>
+        <h4>C3 — "Students won't cheat / bans deter" — unenforceable. <span class="conf">[HIGH]</span></h4>
+        <p>Take-home essays are unobservable; humanizers defeat detectors. A ban punishes the honest and the unlucky while sophisticated users go undeterred.</p>
+        <h4>C4 — "AI literacy is essential, so we must permit it" — non-sequitur. <span class="conf">[MED]</span></h4>
+        <p>Conflates "understand LLMs" with "use LLMs for graded work." You can teach literacy as explicit instruction. Future-proofing rhetoric is used to justify AI on the exact task where erosion risk is highest. <b>Demote.</b></p>
+        <h4>C5 — The "AI as personalized tutor" benefit is real but oversold. <span class="conf">[MED]</span></h4>
+        <p>Cited effect sizes come from structured tutoring systems on procedural STEM, not open ChatGPT on humanities essays. Transferring them is "evidence laundering."</p>
+        <h4>C6 — The MIT "cognitive debt" study is the anti-AI camp's strongest card AND its weakest-vetted one. <span class="conf">[MED]</span></h4>
+        <p>Red-teaming the skeptics' <em>own</em> evidence: non-peer-reviewed preprint, small n, narrow task, media-amplified framing the authors walked back. If the dept head leans on it as a knockout, an AI-advocate can discredit the whole anti-AI case by puncturing one preprint. Use as suggestive, not dispositive.</p>
+        <h4>C7 — Hybrid "disclosure" policies are gameable and tax honesty. <span class="conf">[HIGH]</span></h4>
+        <p>Truthful self-report with no verification: under-disclosers are invisible; honest over-disclosers may be penalized relative to strategic under-disclosers. Converts cheating into lying-about-cheating.</p>
+        <h4>C8 — Permitting AI advantages students who can pay for frontier models. <span class="conf">[MED]</span></h4>
+        <p>Free tiers lag paid ones; permitting imports household income into grades. But a ban also lets privately-tutored kids cheat undetectably. Don't claim the equity high ground either way.</p>
+        <h4>C9 — Teacher incentive corruption: grading AI text changes what grading means. <span class="conf">[MED]</span></h4>
+        <p>Humans score near chance at detecting AI prose; teachers may unconsciously reward fluent AI-polished text over rough human drafts. The grade's construct validity silently erodes — no error message, just degraded signal.</p>
+        <h4>C10 — Failure-mode symmetry: no clean option. <span class="conf">[HIGH]</span></h4>
+        <p>Ban → false convictions + undeterred cheating + adversarial relationships. Permit → skill erosion + pay-gap + grades stop measuring the student. Hybrid → honesty tax + unauditable. Any memo claiming one option is clearly safe is wrong.</p>
+        <h4>C11 — Claims to DEMOTE. <span class="conf">[HIGH]</span></h4>
+        <p>"Detectors 99% accurate"; "AI literacy ⇒ permit on essays"; "AI rots brains" (as settled fact); "disclosure solves integrity"; "banning is impossible so embrace it" (false dichotomy — ignores assessment redesign).</p>
+        <h4>C12 — The unexamined assumption under the whole question. <span class="conf">[MED]</span></h4>
+        <p>"Permit vs. ban on take-home graded essays" smuggles in the premise that the take-home graded essay survives as the assessment unit — like the un-proctored take-home math exam after the calculator, it may simply be obsolete. The highest-leverage option may not be on the three-way menu.</p>
+        <p class="src"><b>Note it volunteered:</b> highest-confidence finding is C1+C2 (detector enforcement is broken and discriminatory); deliberately self-critical item is C6 (don't over-rely on the MIT preprint); the recurring escape hatch is process/oral/proctored assessment, which dissolves the detection arms race.</p>
+      </div>
+
+      <!-- ===== ECONOMIST ===== -->
+      <div class="tabpanel" id="p6">
+        <p class="lens-intro">Lens brief: "Act as an economist. Find costs, ROI, incentives, adoption constraints, market structure, who pays and who benefits." Returned 12 claims plus rough cost magnitudes for an ~1,800-student school.</p>
+
+        <h4>Claim 1 — Detection software is cheap per unit but low-ROI as a control. <span class="conf">[high]</span></h4>
+        <p>Turnitin ~$3.05–3.57/student/yr → ~$5.5–6.4k/yr for 1,800 students — trivial. The line-item cost is not the real cost.</p>
+        <h4>Claim 2 — Detection's TRUE cost is the false-positive tax: investigation labor + appeals + reputational liability. <span class="conf">[high rates / med dollars]</span></h4>
+        <p>At 5% FP × 1,800 × 4 essays ≈ 360 false accusations/yr, each 1–3 hrs of teacher/admin/counselor time. Vendor monetizes the promise of certainty while externalizing error cost onto the school. Net ROI likely negative.</p>
+        <h4>Claim 3 — Assessment redesign is high-fixed/low-marginal cost; detection is low-fixed/high-recurring. <span class="conf">[med]</span></h4>
+        <p>Redesign ≈ tens of hours/course one-time (~$10–40k loaded); detection recurs yearly and scales with enrollment. Redesign is the cheaper steady state but front-loads into one budget year — the timing mismatch is why schools default to the worse option.</p>
+        <h4>Claim 4 — Oral defense is the most AI-robust assessment but is labor-bound at ~1:1 examiner time. <span class="conf">[high]</span></h4>
+        <p>Feasible as sampled spot-checks, not universal.</p>
+        <h4>Claim 5 — Student incentives make a flat ban unenforceable and wasteful. <span class="conf">[high]</span></h4>
+        <p>Grade-maximizers under time scarcity; LLMs push the marginal cost of a passable essay toward zero; porous detection + free tiers make expected penalty low. Prohibition spawns an arms race the school can't win and pays for repeatedly.</p>
+        <h4>Claim 6 — AI vendors have a structural conflict: they sell the disease and the cure. <span class="conf">[high]</span></h4>
+        <p>Same industry sells tutor LLMs to students AND detectors to schools. Treat detector accuracy marketing as a sales channel; demand independent validation.</p>
+        <h4>Claim 7 — The binding adoption constraint is union/contract time and class size, not cash. <span class="conf">[high]</span></h4>
+        <p>Any policy needing new per-essay teacher labor must be funded with release time/stipends or it'll be quietly ignored.</p>
+        <h4>Claim 8 — Equity economics cut against BOTH a pure ban and unmanaged permission. <span class="conf">[med]</span></h4>
+        <p>Free tiers lag paid; ban pushes low-income kids toward unaffordable tutoring; unmanaged permission entrenches the paid/free quality gap. School-provided equal-access AI is the equity-maximizing (costlier) option.</p>
+        <h4>Claim 9 — Permitting LLMs risks eroding the credential's SIGNAL value. <span class="conf">[med]</span></h4>
+        <p>The grade certifies writing/reasoning; if it can be prompted, it separates "can write" from "can prompt" and external consumers discount it — borne by all students. Strongest economic argument for keeping an AI-free verified assessment.</p>
+        <h4>Claim 10 — Most cost-effective policy is hybrid/tiered, not corner solutions. <span class="conf">[med-high]</span></h4>
+        <p>Concentrate expensive human verification only where the signal matters (high-stakes graded work); don't pay detection rent on every essay or oral-defend every essay. Lowest total cost of ownership.</p>
+        <h4>Claim 11 — Detection spend has high opportunity cost vs. PD. <span class="conf">[med]</span></h4>
+        <p>Same dollars fund durable teacher capability instead of a depreciating, contestable signal. Admins favor detection as a visible "we're doing something" purchase — an agency problem.</p>
+        <h4>Claim 12 — Reputational/liability asymmetry drives administrator over-investment in detection. <span class="conf">[med]</span></h4>
+        <p>Loss-averse admins over-weight the visible lawsuit tail and paradoxically buy the thing (detection) that <em>causes</em> false-accusation liability. Surfacing the FP liability reframes detection as risk-creation.</p>
+        <p class="src"><b>Rough magnitudes (1,800-student school):</b> detector subscription ≈ $5.5–6.4k/yr; false-positive adjudication labor ≈ $18–54k/yr; one-time redesign/PD ≈ $10–40k; universal oral defense ≈ examiner-time-prohibitive, sampled ≈ feasible.</p>
+      </div>
+
+      <!-- ===== HISTORIAN ===== -->
+      <div class="tabpanel" id="p7">
+        <p class="lens-intro">Lens brief: "Act as a historian of education and technology. Find analogies, prior adoption cycles, repeated failure patterns, institutional constraints, and what history suggests happens next." For each analogy it was asked to say where it holds AND where it breaks.</p>
+
+        <h4>Claim 1 — Calculator/NCTM: a banned tool became officially recommended within a generation. <span class="conf">[HIGH history / MED transfer]</span></h4>
+        <p>Identical 1970s panic; NCTM's <em>Agenda for Action</em> (1980) recommended calculators at all grade levels. <b>Breaks:</b> a calculator automates a sub-step inside reasoning; an LLM can automate the entire essay — the analogy understates how much it replaces.</p>
+        <h4>Claim 2 — The calculator settlement was two-tier assessment, not a yes/no rule. <span class="conf">[HIGH]</span></h4>
+        <p>Calculator and non-calculator sections (SAT 1994). The stable LLM equilibrium is analogous: in-class/oral anchors assess unaided capability; take-home assumes assistance. <b>Breaks:</b> the "non-calculator section" equivalent for writing has to be in-person writing, which is costly.</p>
+        <h4>Claim 3 — Wikipedia: the ban-then-literacy cycle ran in only ~4–5 years. <span class="conf">[HIGH timeline / MED analogy]</span></h4>
+        <p>Banned 2007–08, taught as a critical starting point by ~2011. <b>Breaks:</b> Wikipedia is a source to verify; an LLM generates the student's own text — "verify the source" doesn't map onto "did you write this."</p>
+        <h4>Claim 4 — SparkNotes/CliffsNotes: the closest precedent for "outsourcing the thinking," never bannable. <span class="conf">[MED-HIGH]</span></h4>
+        <p>Study guides let students substitute a summary for reading — and threatened literary analysis specifically, like LLMs. Never banned; teachers responded by assessing what summaries couldn't fake. <b>Breaks:</b> SparkNotes is generic and detectable; LLM output is bespoke and far harder to catch. "LLMs are SparkNotes that can't be pattern-matched."</p>
+        <h4>Claim 5 — Banning a tool students already own at home reliably fails and is regressive. <span class="conf">[MED-HIGH]</span></h4>
+        <p>Across calculators, word processors, internet, Wikipedia: bans became unenforceable AND widened equity gaps, binding only compliant and under-resourced students. <b>Breaks:</b> detection gives schools <em>some</em> leverage they lacked — but detection has its own equity hazard.</p>
+        <h4>Claim 6 — Plato's Phaedrus / printing press: the "this will destroy thinking" panic is ~2,400 years old and recurs verbatim. <span class="conf">[HIGH panic recurs / LOW as evidence]</span></h4>
+        <p>Socrates warned writing would "implant forgetfulness." <b>Breaks:</b> survivorship bias — "we always panicked and it was fine" doesn't prove this tool is benign; writing/print <em>added</em> knowledge, an LLM can <em>substitute</em> for composing.</p>
+        <h4>Claim 7 — Spell-check/word processors: the quiet total adoption nobody now questions. <span class="conf">[MED-HIGH]</span></h4>
+        <p>The most common ending isn't acceptance or rejection but silent normalization — the assessed skill quietly shifts. <b>Breaks:</b> spell-check doesn't generate the argument; normalization happened because the lost skill (manual spelling) was low-value — composition may not be.</p>
+        <h4>Claim 8 — Open-book exams: institutions handled "the resource is available" by raising cognitive demand. <span class="conf">[MED]</span></h4>
+        <p>Questions redesigned so having the material doesn't yield the answer. <b>Breaks:</b> open-book assumed the reasoning was still the student's; LLMs supply the reasoning too, so "harder prompts" can just raise the bar for the AI.</p>
+        <h4>Claim 9 — Detection/enforcement arms races against student tech have a near-perfect losing record. <span class="conf">[MED-HIGH]</span></h4>
+        <p>Turnitin, calculator-memory clearing, phone bans, internet filters — each enforcement-first response was lost or only partially won, at the cost of adversarial relationships and false accusations.</p>
+        <h4>Claim 10 — Institutional inertia: assessment, admissions, and standardized testing change far slower than the classroom. <span class="conf">[MED-HIGH]</span></h4>
+        <p>Calculators took ~14 yrs from NCTM (1980) to SAT (1994); curriculum led, high-stakes tests lagged. Any "students may use LLMs" policy must still guarantee students can write competently unaided for the venues that lag years behind.</p>
+        <h4>Claim 11 — What history suggests next: managed integration with a redefined assessed skill, in 2–5 years, not prohibition. <span class="conf">[MED — direction HIGH, timing MED-LOW]</span></h4>
+        <p>Every comparable cycle ended in integration + redefinition of what's assessed. <b>Breaks:</b> base rates aren't destiny — this is the one cycle where the tool can hollow out the <em>core</em> skill, so a worse outcome is genuinely possible. Build the protected unaided tier now; treat a ban as a time-boxed bridge, not a destination.</p>
+        <p class="src"><b>Unifying signal:</b> bans of ubiquitous tools are transitional and inequitable, and every cycle resolved by redesigning assessment rather than the rule — but LLMs uniquely threaten the entire assessed artifact, so the optimistic base rate shouldn't be assumed and the one robust move (a protected proctored/oral unaided tier) should be preserved regardless.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Source Verification</h2>
+    <p class="note">Each major claim was checked against its source; load-bearing and post-cutoff (2026) items were re-verified live. Labels: <span class="v-confirmed">Confirmed</span> · <span class="v-corrected">Corrected</span> · <span class="v-demoted">Demoted</span>.</p>
+    <table>
+      <thead><tr><th>Claim / figure</th><th>Source</th><th>Status</th><th>Verification note</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Detectors falsely flagged 61.3% of non-native (TOEFL) essays; near-zero for US-native</td>
+          <td>Liang et al., Stanford, <em>Patterns</em> 2023</td>
+          <td class="v-confirmed">Confirmed</td>
+          <td>Re-verified: 7 detectors, 91 TOEFL essays; 19.8% unanimously flagged, 97.8% by ≥1 detector. Figure exact.</td>
+        </tr>
+        <tr>
+          <td>54% of U.S. teens have used chatbots for schoolwork</td>
+          <td>Pew Research Center, "How Teens Use and View AI," Feb 24 2026</td>
+          <td class="v-confirmed">Confirmed</td>
+          <td>Re-verified: 54% schoolwork, 57% info search; survey Sept–Oct 2025; 59% say AI cheating happens often. Post-cutoff item, confirmed live.</td>
+        </tr>
+        <tr>
+          <td>Live $150M federal civil-rights suit over a false AI-cheating accusation</td>
+          <td>Palo Alto Unified / Kato v. PAUSD; SF Standard + Palo Alto Online, May–June 2026</td>
+          <td class="v-corrected">Corrected</td>
+          <td>Confirmed and detail corrected: 76% Turnitin score on a sophomore's "The Crucible" essay; suit alleges <em>racial and gender</em> disparity + due-process failure (not an ESL case, as one lens implied). District fighting it as of June 26 2026.</td>
+        </tr>
+        <tr>
+          <td>Turnitin admits ~4% document-level false-positive rate</td>
+          <td>Annie Chechitelli (Turnitin CPO), Bloomberg, Oct 2024</td>
+          <td class="v-confirmed">Confirmed</td>
+          <td>Vendor's own admission; independent real-world estimates run higher. Used as a floor, not a ceiling.</td>
+        </tr>
+        <tr>
+          <td>NCTM recommended calculators (1980); SAT added calculator sections (1994)</td>
+          <td>NCTM <em>An Agenda for Action</em>; College Board SAT policy history</td>
+          <td class="v-confirmed">Confirmed</td>
+          <td>Policy timeline accurate. Analogy explicitly flagged as breaking down (LLM replaces whole artifact, not a sub-step).</td>
+        </tr>
+        <tr>
+          <td>MIT "cognitive debt": LLM-assisted writers showed weakest brain connectivity and poor recall</td>
+          <td>Kosmyna et al., MIT Media Lab, arXiv 2506.08872, 2025</td>
+          <td class="v-corrected">Corrected (down-weighted)</td>
+          <td>Study real and correctly described (n=54; only 18 in session 4; EEG). But it is a <em>preprint, adults, lab task</em>. Wording softened to "associated with," not "causes." Used as suggestive, not dispositive.</td>
+        </tr>
+        <tr>
+          <td>Writing-to-learn improves learning (effect size d≈0.26)</td>
+          <td>Bangert-Drowns, Hurley &amp; Wilkinson, <em>Review of Educational Research</em>, 2004</td>
+          <td class="v-confirmed">Confirmed</td>
+          <td>Large pre-AI meta-analysis; effect is real but small. Supports "writing has cognitive value," not "any AI use destroys it."</td>
+        </tr>
+        <tr>
+          <td>Well-designed AI tutoring roughly doubled learning gains</td>
+          <td>Kestin et al., Harvard, <em>Scientific Reports</em>, 2025 (RCT)</td>
+          <td class="v-corrected">Corrected (scope-limited)</td>
+          <td>Real RCT, but used a <em>constrained</em> tutor that withholds answers — not open ChatGPT, not essay grading. Does not transfer to the graded-essay use case; cited only to show design determines harm/benefit.</td>
+        </tr>
+        <tr>
+          <td>Turnitin ~$3/student/yr; detector subscription is the small cost</td>
+          <td>The Markup / CSU procurement data, 2025</td>
+          <td class="v-confirmed">Confirmed</td>
+          <td>Pricing accurate; the load-bearing point (hidden adjudication-labor cost dominates) is analysis, labeled as such.</td>
+        </tr>
+        <tr>
+          <td>"AI detectors are ~99% accurate"</td>
+          <td>Vendor marketing (various)</td>
+          <td class="v-demoted">Demoted</td>
+          <td>Interested, lab-condition claim contradicted by independent testing and institutional disabling of the tools. Excluded from recommendations.</td>
+        </tr>
+        <tr>
+          <td>"Disclosure solves integrity" / "AI literacy ⇒ permit on essays"</td>
+          <td>Common debate talking points</td>
+          <td class="v-demoted">Demoted</td>
+          <td>Disclosure is unauditable without process evidence; the literacy argument is a non-sequitur. Both demoted to weak per skeptic red-team.</td>
+        </tr>
+        <tr>
+          <td>Turnitin false-positive ~18.7% on non-native writers (2025 follow-up)</td>
+          <td>Secondary summaries (Leap AI / Walter Writes)</td>
+          <td class="v-demoted">Demoted</td>
+          <td>Directionally consistent with the Stanford finding but rests on secondary sourcing; not used as a primary figure. The verified 61.3% Stanford result carries the equity claim instead.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="note" style="margin-top:14px;">Method: scope → 5 parallel lens subagents (practitioner · academic · skeptic · economist · historian) → contradiction map → synthesis (V1) → adversarial verification (V2, with live re-checks on load-bearing and 2026-dated claims) → this briefing. The lenses did not talk to each other; agreements above are independent convergence, and contradictions were preserved rather than smoothed. Token-heavy by design; uncertainty is surfaced deliberately. <strong>This briefing informs the decision — it does not make it, and is not legal advice.</strong></p>
+  </section>
+</main>
+</body>
+</html>

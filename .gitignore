@@ -1,0 +1,9 @@
+# Local scratch / transcripts
+.ignore/
+
+# Vendored third-party design system (installed separately, not part of this skill)
+Anthropic Design System/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
