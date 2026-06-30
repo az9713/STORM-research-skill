@@ -8,6 +8,8 @@ verifies every claim before writing the report.
 
 **▶ Live example briefing:** https://az9713.github.io/STORM-research-skill/
 
+[![STORM research briefing — click to open the live page](preview.png)](https://az9713.github.io/STORM-research-skill/)
+
 > **Credit / inspiration.** Reverse-engineered from the YouTube walkthrough
 > **"Stanford's Method Turns Claude Into a PHD Level Research Team"**
 > — https://www.youtube.com/watch?v=Tj3018n5MVg&t=14s.
