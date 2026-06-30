@@ -6,6 +6,8 @@ that runs a STORM-inspired research pipeline: it fans out five independent "lens
 subagents, maps where they agree and collide, synthesizes a draft, then adversarially
 verifies every claim before writing the report.
 
+**▶ Live example briefing:** https://az9713.github.io/STORM-research-skill/
+
 > **Credit / inspiration.** Reverse-engineered from the YouTube walkthrough
 > **"Stanford's Method Turns Claude Into a PHD Level Research Team"**
 > — https://www.youtube.com/watch?v=Tj3018n5MVg&t=14s.
@@ -21,7 +23,8 @@ lens, practical takeaways, and a **source-verification table** labelling each cl
 `Confirmed` / `Corrected` / `Demoted`. It informs a decision — it does not issue a verdict,
 and surfaces uncertainty on purpose.
 
-See [`storm-llm-essays-briefing.html`](storm-llm-essays-briefing.html) for a full example
+See the **[live briefing](https://az9713.github.io/STORM-research-skill/)** (or the source
+[`storm-llm-essays-briefing.html`](storm-llm-essays-briefing.html)) for a full example
 run (topic: *should a high-school department permit LLMs on graded essays?*).
 
 ## The five lenses (parallel subagents)
